@@ -1,16 +1,14 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * FireAnts assembler program
+ * CS 7306
+ * Lab 2 lab team 4
+ * Brad Vick, Jared Palmer, William Miller
  */
 package fireantsnetbeans;
 
     import java.io.*;
     import java.util.*;
-/**
- *
- * @author bwvick
- */
+
 public class FireAntsNetBeans {
 @SuppressWarnings("unchecked")
     /**
@@ -19,20 +17,22 @@ public class FireAntsNetBeans {
     public static void main(String[] args) {
            
       try {
-          //open the assembly code file
+          
+          //open the assembly code file passed in
           BufferedReader br = new BufferedReader(new FileReader(args[0]));
           StringBuilder sb = new StringBuilder();
           String line = br.readLine();
           
+          //new array list to hold the machine language instructions
           ArrayList machineInstructions = new ArrayList();
           
+          //arrays for the different instructions 
           String[] rInstructions = {"add", "sub", "slt", "and", "nor"};
           String[] iInstructions = {"lwd", "swd", "beq"};
-          
-          
+                    
           //loop over each line of the file
           while (line !=null) {
-              //determine instruction type
+              //determine instruction type and parse that instruction
               
               //j type
               if (line.substring(0,1).equals("j")) {
@@ -48,7 +48,8 @@ public class FireAntsNetBeans {
               else if (Arrays.asList(iInstructions).contains(line.substring(0,3))) {
                   machineInstructions.add(parseIType(line));
               }
-                                 
+                            
+              //read next line in source file
               line=br.readLine();
           }
           
