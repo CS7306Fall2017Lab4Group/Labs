@@ -73,7 +73,9 @@ public class FireAntsNetBeans {
         //possible instructions
         //j address
         
-        return "J " + instruction;
+        int opcode = 2;
+        int address = Integer.parseInt(instruction.substring(1).trim());
+        return IntToBinary(address, 26) + IntToBinary(opcode, 6);
     }
     
     private static String parseRType(String instruction) {
@@ -86,7 +88,31 @@ public class FireAntsNetBeans {
         //slt $rd, $rs, $rt - opcode=30
         //and $rd, $rs, $rt - opcode=40
         //nor $rd, $rs, $rt - opcode=50
-        return "R " + instruction;
+        int rd = 0;
+        int rs = 0;
+        int rt = 0;
+        int opcode = 0;
+        
+        //determine opcode
+        if (instruction.substring(0,3).equals("add"))
+            opcode=10;
+        else if ((instruction.substring(0,3).equals("sub")))
+            opcode=20;
+        else if ((instruction.substring(0,3).equals("slt")))
+            opcode=30;
+        else if ((instruction.substring(0,3).equals("and")))
+            opcode=40;
+        else if ((instruction.substring(0,3).equals("nor")))
+            opcode=50;
+        
+        //split the arguments
+        String[] instructionArguments = instruction.substring(3).split(",");
+        rd = Integer.parseInt(instructionArguments[0].trim().substring(1));
+        rs = Integer.parseInt(instructionArguments[1].trim().substring(1));
+        rt = Integer.parseInt(instructionArguments[2].trim().substring(1));
+        
+         return "00000000000" + IntToBinary(rd, 5) + IntToBinary(rs, 5) + IntToBinary(rt, 5) + IntToBinary(opcode, 6);
+                        
     }
     
     private static String parseIType(String instruction) {
@@ -96,8 +122,41 @@ public class FireAntsNetBeans {
         //lwd $rt, offset($rs) - opcode=35
         //swd $rt, offset($rs) - opcode=43
         //beq $rt, $rs, offset - opcode=2
+        int offset = 0;
+        int rs = 0;
+        int rt = 0;
+        int opcode = 0;
         
-        return "I " + instruction;
+                //determine opcode
+        if (instruction.substring(0,3).equals("lwd"))
+            opcode=35;
+        else if ((instruction.substring(0,3).equals("swd")))
+            opcode=43;
+        else if ((instruction.substring(0,3).equals("beq")))
+            opcode=2;
+        
+        if (instruction.contains("(")) {
+            // lwd and swd have ()
+            String[] instructionArguments = instruction.substring(3).split(",");            
+            rt = Integer.parseInt(instructionArguments[0].trim().substring(1));
+            String tempInstruction = instructionArguments[1].replace("(", ",").replace(")", ",");
+            String[] OffsetRs = tempInstruction.split(",");
+            offset = Integer.parseInt(OffsetRs[0].trim());
+            rs = Integer.parseInt(OffsetRs[1].trim().substring(1));
+                                       
+        }
+            else
+            //beq no ()
+        {
+            //split the arguments
+            String[] instructionArguments = instruction.substring(3).split(",");
+            rt = Integer.parseInt(instructionArguments[0].trim().substring(1));
+            rs = Integer.parseInt(instructionArguments[1].trim().substring(1));
+            offset = Integer.parseInt(instructionArguments[2].trim());  
+        }
+
+        
+         return IntToBinary(offset, 16) + IntToBinary(rs, 5) + IntToBinary(rt, 5) + IntToBinary(opcode, 6);
     }
     
     private static void OutputOFile(ArrayList machineInstructions, String FileName)
@@ -118,7 +177,7 @@ public class FireAntsNetBeans {
         try {
         PrintWriter out = new PrintWriter(FileName);
         for (int i = 0; i < machineInstructions.size(); i++) {
-            out.println(machineInstructions.get(i));
+            out.println(BinaryToHex(machineInstructions.get(i).toString()));
         }
         out.close();
         } catch (IOException e) {
